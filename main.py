@@ -1,9 +1,10 @@
 from tkinter import NO
-from flask import Flask
-from flask import render_template
+from flask import Flask, render_template, request
 import datetime
 import requests
 from posts import Post
+from email_manager import EmailManager
+
 
 today=datetime.datetime.now()
 year=today.year
@@ -33,9 +34,17 @@ def show_route(id):
             requested_post=post
     return render_template("post.html", post=requested_post, year=year)
 
-@app.route("/contact")
+@app.route("/contact", methods=["POST", "GET"])
 def contact():
-    return render_template("contact.html",year=year)
+    if request.method=="POST":
+        email=EmailManager()
+        data = request.form
+        final_message=email.send_email(data["name"],data["email"],data["phone"],data["message"])
+        return render_template("contact.html",year=year,msg=True,final_message=final_message)
+    
+    return render_template("contact.html",year=year,msg=False)
+
+    
 
 @app.route("/about")
 def about():
